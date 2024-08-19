@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galadriel Indexer Dashboard</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [chats, setChats] = React.useState([]);
+            const [benchmarks, setBenchmarks] = React.useState([]);
+
+            React.useEffect(() => {
+                fetchChats();
+                fetchBenchmarks();
+            }, []);
+
+            const fetchChats = async () => {
+                try {
+                    const response = await axios.post('http://localhost:8080/v1/graphql', {
+                        query: `
+                            query {
+                                chats {
+                                    id
+                                    owner
+                                    createdAt
+                                    messages {
+                                        content
+                                        role
+                                    }
+                                }
+                            }
+                        `
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-hasura-admin-secret': 'testing'
+                        }
+                    });
+                    setChats(response.data.data.chats);
+                } catch (error) {
+                    console.error('Error fetching chats:', error);
+                }
+            };
+
+            const fetchBenchmarks = async () => {
+                try {
+                    const response = await axios.post('http://localhost:8080/v1/graphql', {
+                        query: `
+                            query {
+                                benchmarks {
+                                    id
+                                    gameAddress
+                                    targetScore
+                                    odds
+                                    deadline
+                                    active
+                                }
+                            }
+                        `
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-hasura-admin-secret': 'testing'
+                        }
+                    });
+                    setBenchmarks(response.data.data.benchmarks);
+                } catch (error) {
+                    console.error('Error fetching benchmarks:', error);
+                }
+            };
+
+            return (
+                <div className="container mx-auto p-4">
+                    <h1 className="text-3xl font-bold mb-4">Galadriel Indexer Dashboard</h1>
+                    
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-semibold mb-2">AnthropicChatGpt Chats</h2>
+                        <ul>
+                            {chats.map(chat => (
+                                <li key={chat.id} className="mb-4 p-4 border rounded">
+                                    <p>ID: {chat.id}</p>
+                                    <p>Owner: {chat.owner}</p>
+                                    <p>Created At: {new Date(parseInt(chat.createdAt)).toLocaleString()}</p>
+                                    <p>Messages: {chat.messages.length}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h2 className="text-2xl font-semibold mb-2">BenchmarkMarketplace Benchmarks</h2>
+                        <ul>
+                            {benchmarks.map(benchmark => (
+                                <li key={benchmark.id} className="mb-4 p-4 border rounded">
+                                    <p>ID: {benchmark.id}</p>
+                                    <p>Game Address: {benchmark.gameAddress}</p>
+                                    <p>Target Score: {benchmark.targetScore}</p>
+                                    <p>Odds: {benchmark.odds}</p>
+                                    <p>Deadline: {new Date(parseInt(benchmark.deadline)).toLocaleString()}</p>
+                                    <p>Active: {benchmark.active ? 'Yes' : 'No'}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

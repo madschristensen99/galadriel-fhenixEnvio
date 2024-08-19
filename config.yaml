@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: Galadriel
+description: Galadriel indexer for AI Benchmark Marketplace
+
+contracts:
+  - name: AnthropicChatGpt
+    abi_file_path: ./abis/galadriel-abi.json
+    handler: ./src/EventHandlers.js
+    events:
+      - event: "OracleLlmResponseReceived(uint256 runId, string content, string functionName, string functionArguments, string errorMessage)"
+      - event: "ChatCreated(address owner, uint256 chatId)"
+      - event: "MessageAdded(uint256 chatId, address sender, string role)"
+  - name: BenchmarkMarketplace
+    abi_file_path: ./abis/fhenixMarket-abi.json
+    handler: ./src/EventHandlers.js
+    events:
+      - event: "BenchmarkCreated(uint256 benchmarkId, address gameAddress, uint256 targetScore, uint256 odds, uint256 deadline)"
+      - event: "BenchmarkUpdated(uint256 benchmarkId, uint256 newOdds)"
+      - event: "BenchmarkCompleted(uint256 benchmarkId, address winner, uint256 score)"
+      - event: "GameApproved(address gameAddress, string name)"
+      - event: "GameRemoved(address gameAddress)"
+      - event: "StakePlaced(uint256 benchmarkId, address player, uint256 amount)"
+      - event: "WinningsClaimed(uint256 benchmarkId, address player, uint256 amount)"
+
+networks:
+  - id: 696969 # Galadriel
+    rpc_config:
+      url: "https://devnet.galadriel.com"
+    start_block: 31251043
+    contracts:
+      - name: AnthropicChatGpt
+        address: "0xAdB7FE1e1d46166CaBD853bAB8E20c3650992A98"
+  - id: 8008135 # Fhenix
+    rpc_config:
+      url: "https://api.helium.fhenix.zone"
+    start_block: 214247
+    contracts:
+      - name: BenchmarkMarketplace
+        address: "0x56E203846e90235EDBCeaf98c9a45B73cD9Ffe5d"
+
+field_selection:
+  transaction_fields:
+    - "hash"
+    - "transactionIndex"
+  block_fields:
+    - "parentHash"

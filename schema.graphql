@@ -1,0 +1,58 @@
+type Chat @entity {
+  id: ID!
+  owner: Bytes!
+  messages: [Message!]! @derivedFrom(field: "chat")
+  createdAt: BigInt!
+}
+
+type Message @entity {
+  id: ID!
+  chat: Chat!
+  sender: Bytes!
+  role: String!
+  content: String!
+  timestamp: BigInt!
+}
+
+type LlmResponse @entity {
+  id: ID!
+  chat: Chat!
+  content: String!
+  functionName: String
+  functionArguments: String
+  errorMessage: String
+  timestamp: BigInt!
+}
+
+type Benchmark @entity {
+  id: ID!
+  gameAddress: Bytes!
+  targetScore: BigInt!
+  odds: BigInt!
+  deadline: BigInt!
+  totalStake: BigInt!
+  active: Boolean!
+  stakes: [Stake!]! @derivedFrom(field: "benchmark")
+  winner: Bytes
+  finalScore: BigInt
+}
+
+type Game @entity {
+  id: ID!
+  name: String!
+  approved: Boolean!
+}
+
+type Stake @entity {
+  id: ID!
+  benchmark: Benchmark!
+  player: Bytes!
+  amount: BigInt!
+}
+
+type WinningClaim @entity {
+  id: ID!
+  benchmark: Benchmark!
+  player: Bytes!
+  amount: BigInt!
+}
